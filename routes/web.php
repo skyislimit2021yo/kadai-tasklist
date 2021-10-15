@@ -11,6 +11,8 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', 'TasksController@index');
+
+Route::resource('tasks', 'TasksController');
+// //複写機能（ボタン）
+// Route::get('tasks/{id}/copy', 'TasksController@copy');
