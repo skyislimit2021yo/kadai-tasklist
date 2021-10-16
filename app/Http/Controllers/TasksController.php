@@ -50,7 +50,7 @@ class TasksController extends Controller
             'status' => 'required|max:10',   
         ]);
         $request->validate([
-            'content' => 'required|max255',   
+            'content' => 'required|max:255',   
         ]);
         
         //メッセージを作成
