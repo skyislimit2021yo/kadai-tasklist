@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 
 use App\Task;
+use App\User;
 
 class TasksController extends Controller
 {
@@ -13,14 +14,22 @@ class TasksController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
-    {
-        //一覧表示
-        $tasks = Task::all();
+    public function index(){
+        
+        $data = [];
+        
+        if(\Auth::check()){
+            $user = \Auth::user();
+            $tasks = $user->tasks()->orderBy('created_at','desc')->paginate(10);
+            
+            $data = [
+                'user' => $user,
+                'tasks' => $tasks,
+            ];
+        }
+        
         //ビューで表示
-        return view('tasks.index', [
-            'tasks' => $tasks,
-        ]);
+        return view('tasks.index', $data);
     }
 
     /**
@@ -52,11 +61,13 @@ class TasksController extends Controller
         $request->validate([
             'content' => 'required|max:255',   
         ]);
-        
+
+    
         //メッセージを作成
         $task = new Task;
         $task->status = $request->status;
         $task->content = $request->content;
+        $task->user_id = $request->user()->id;
         $task->save();
         
         return redirect('/');
@@ -131,8 +142,11 @@ class TasksController extends Controller
     public function destroy($id)
     {
         $task = Task::findOrFail($id);
-        $task->delete();
         
+        if(\Auth::id() === $task->user_id){
+            $task->delete();
+        }
+      
         return redirect('/');
     }
 }
